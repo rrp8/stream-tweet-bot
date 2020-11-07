@@ -88,7 +88,6 @@ def twitter_bot():
         print("TITLE: " + info_dict["title"])
 
     time.sleep(refresh_rate())
-    # time.sleep(20)  # definetely don't make this 2 seconds, I think 60 seconds will be fine
 
 while True:
     twitter_bot()
