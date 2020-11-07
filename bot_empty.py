@@ -29,13 +29,11 @@ def twitter_bot():
     response = requests.get(api_cred.api_url, headers=api_cred.HEADERS)
     stream_is_live = response.json()["data"][0]["is_live"]
     stream_title = response.json()["data"][0]["title"]
-    # stream_category = response.json()["data"][0]["game_id"]  # I don't know how to read it
     stream_url = "https://www.twitch.tv/<streamer_nickname>"
 
     tweets_content = {
         "tweet_stream": f".@<Twitter_handle> IS LIVE!\n\n{stream_title}\n\n{stream_url}",
-        "tweet_change_title": f".@<Twitter_handle> IS STILL LIVE!\n\n{stream_title}\n\n{stream_url}",
-        "test": ".@<Twitter_handle> it's just a test 3"}
+        "tweet_change_title": f".@<Twitter_handle> IS STILL LIVE!\n\n{stream_title}\n\n{stream_url}"}
 
     if stream_is_live and not already_tweeted:
         info_dict["title"] = stream_title
