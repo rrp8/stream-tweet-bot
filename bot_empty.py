@@ -2,6 +2,9 @@ import requests
 import time
 import tweepy
 import api_cred
+import json
+
+# BOT V1.2
 
 already_tweeted = False
 info_dict = {
@@ -29,12 +32,20 @@ def twitter_bot():
     response = requests.get(api_cred.api_url, headers=api_cred.HEADERS)
     stream_is_live = response.json()["data"][0]["is_live"]
     stream_title = response.json()["data"][0]["title"]
-    stream_url = "https://www.twitch.tv/<streamer_nickname>"
+    broadcast_start = response.json()["data"][0]["started_at"]
+    stream_category = response.json()["data"][0]["game_id"]
+    category_get_name = requests.get(f"https://api.twitch.tv/helix/games?id={stream_category}", headers=api_cred.HEADERS)
+    try:
+        category_name = category_get_name.json()["data"][0]["name"]
+    except:
+        category_name = "no category"
+    stream_url = "https://www.twitch.tv/justaminx"
 
     tweets_content = {
-        "tweet_stream": f".@<Twitter_handle> IS LIVE!\n\n{stream_title}\n\n{stream_url}",
-        "tweet_change_title": f".@<Twitter_handle> IS STILL LIVE!\n\n{stream_title}\n\n{stream_url}"}
-
+        "tweet_stream": f".@JustaMinx IS LIVE!\n\n{stream_title}\n\nCategory: {category_name}\n\n{stream_url}",
+        "tweet_change_title": f".@JustaMinx IS STILL LIVE!\n\n{stream_title}\n\nCategory: {category_name}\n\n{stream_url}",
+        "test": ".@JustaMinx it's just a test 3"}
+    
     if stream_is_live and not already_tweeted:
         info_dict["title"] = stream_title
         # reference here https://github.com/tweepy/tweepy/issues/768 for try/except
@@ -45,12 +56,12 @@ def twitter_bot():
             already_tweeted = True
         except tweepy.TweepError:
             try:
-                not_duplicate_tweet = info_dict["tweet_stream"] + "\n."
+                not_duplicate_tweet = tweets_content["tweet_stream"] + "\n."
                 first_tweet = twitter_api.update_status(not_duplicate_tweet)
                 info_dict["tweet_id"] = first_tweet.id
                 already_tweeted = True
             except tweepy.TweepError:
-                not_duplicate_tweet_2 = info_dict["tweet_stream"] + "\n..."
+                not_duplicate_tweet_2 = tweets_content["tweet_stream"] + "\n..."
                 first_tweet = twitter_api.update_status(not_duplicate_tweet_2)
                 info_dict["tweet_id"] = first_tweet.id
                 already_tweeted = True
@@ -65,11 +76,11 @@ def twitter_bot():
             info_dict["tweet_id"] = second_tweet.id
         except tweepy.TweepError:
             try:
-                not_duplicate_answer = info_dict["tweet_change_title"] + "\n."
+                not_duplicate_answer = tweets_content["tweet_change_title"] + "\n."
                 second_tweet = twitter_api.update_status(not_duplicate_answer, info_dict["tweet_id"])
                 info_dict["tweet_id"] = second_tweet.id
             except tweepy.TweepError:
-                not_duplicate_answer_2 = info_dict["tweet_change_title"] + "\n..."
+                not_duplicate_answer_2 = tweets_content["tweet_change_title"] + "\n..."
                 second_tweet = twitter_api.update_status(not_duplicate_answer_2, info_dict["tweet_id"])
                 info_dict["tweet_id"] = second_tweet.id
 
@@ -84,8 +95,38 @@ def twitter_bot():
     else:
         print("STATUS: LIVE -- NO CHANGE")
         print("TITLE: " + info_dict["title"])
+    
+    if stream_is_live:
+        twe_id_infodict = info_dict["tweet_id"]
+        title_infodict = info_dict["title"]
+
+        dict_json = {
+            "data":{
+                "tweet_id": twe_id_infodict,
+                "broadcast_start": broadcast_start,
+                "stream_title": title_infodict
+                }
+            }
+
+        object_json = json.dumps(dict_json, indent=4)
+        with open("info.json", "w") as FILE:
+            FILE.write(object_json)
 
     time.sleep(refresh_rate())
+    # time.sleep(20)  # definetely don't make this 2 seconds, I think 60 seconds will be fine
+
+
+one_time_twitch_api_call = requests.get(api_cred.api_url, headers=api_cred.HEADERS)
+one_time_broadcast_start = one_time_twitch_api_call.json()["data"][0]["started_at"]
+
+with open("info.json") as one_time_json_file:
+    json_load = json.load(one_time_json_file)
+
+if json_load["data"]["broadcast_start"] == one_time_broadcast_start:
+    already_tweeted = True
+    info_dict["tweet_id"] = json_load["data"]["tweet_id"]
+    info_dict["title"] = json_load["data"]["stream_title"]
 
 while True:
     twitter_bot()
+    
