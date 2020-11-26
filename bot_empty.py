@@ -4,7 +4,7 @@ import tweepy
 import api_cred
 import json
 
-# BOT V1.2
+# BOT V1.2.
 
 already_tweeted = False
 info_dict = {
