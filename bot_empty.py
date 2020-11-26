@@ -4,7 +4,7 @@ import tweepy
 import api_cred
 import json
 
-# BOT V1.2.
+# BOT V1.2
 
 already_tweeted = False
 info_dict = {
@@ -113,7 +113,6 @@ def twitter_bot():
             FILE.write(object_json)
 
     time.sleep(refresh_rate())
-    # time.sleep(20)  # definetely don't make this 2 seconds, I think 60 seconds will be fine
 
 
 one_time_twitch_api_call = requests.get(api_cred.api_url, headers=api_cred.HEADERS)
