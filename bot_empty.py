@@ -39,16 +39,14 @@ def twitter_bot():
         category_name = category_get_name.json()["data"][0]["name"]
     except:
         category_name = "no category"
-    stream_url = "https://www.twitch.tv/justaminx"
+    stream_url = "https://www.twitch.tv/<streamer_name>"
 
     tweets_content = {
-        "tweet_stream": f".@JustaMinx IS LIVE!\n\n{stream_title}\n\nCategory: {category_name}\n\n{stream_url}",
-        "tweet_change_title": f".@JustaMinx IS STILL LIVE!\n\n{stream_title}\n\nCategory: {category_name}\n\n{stream_url}",
-        "test": ".@JustaMinx it's just a test 3"}
+        "tweet_stream": f".@<streamer_@> IS LIVE!\n\n{stream_title}\n\nCategory: {category_name}\n\n{stream_url}",
+        "tweet_change_title": f".@<streamer_@> IS STILL LIVE!\n\n{stream_title}\n\nCategory: {category_name}\n\n{stream_url}"}
     
     if stream_is_live and not already_tweeted:
         info_dict["title"] = stream_title
-        # reference here https://github.com/tweepy/tweepy/issues/768 for try/except
 
         try:
             first_tweet = twitter_api.update_status(tweets_content["tweet_stream"])
