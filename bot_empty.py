@@ -1,7 +1,7 @@
 import requests
 import time
 import tweepy
-import api_cred
+import api_cred, savedata
 import json
 
 # BOT V1.2
@@ -95,20 +95,9 @@ def twitter_bot():
         print("TITLE: " + info_dict["title"])
     
     if stream_is_live:
-        twe_id_infodict = info_dict["tweet_id"]
-        title_infodict = info_dict["title"]
-
-        dict_json = {
-            "data":{
-                "tweet_id": twe_id_infodict,
-                "broadcast_start": broadcast_start,
-                "stream_title": title_infodict
-                }
-            }
-
-        object_json = json.dumps(dict_json, indent=4)
-        with open("info.json", "w") as FILE:
-            FILE.write(object_json)
+        savedata.id_tweet = info_dict["tweet_id"]
+        savedata.stream_title = info_dict["title"]
+        savedata.broad_start = broadcast_start
 
     time.sleep(refresh_rate())
 
@@ -116,13 +105,10 @@ def twitter_bot():
 one_time_twitch_api_call = requests.get(api_cred.api_url, headers=api_cred.HEADERS)
 one_time_broadcast_start = one_time_twitch_api_call.json()["data"][0]["started_at"]
 
-with open("info.json") as one_time_json_file:
-    json_load = json.load(one_time_json_file)
-
-if json_load["data"]["broadcast_start"] == one_time_broadcast_start:
+if savedata.broad_start == one_time_broadcast_start:
     already_tweeted = True
-    info_dict["tweet_id"] = json_load["data"]["tweet_id"]
-    info_dict["title"] = json_load["data"]["stream_title"]
+    info_dict["tweet_id"] = savedata.id_tweet
+    info_dict["title"] = savedata.stream_title
 
 while True:
     twitter_bot()
